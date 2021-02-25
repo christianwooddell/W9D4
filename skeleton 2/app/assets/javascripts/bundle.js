@@ -105,12 +105,19 @@ const APIUtil = {
   },
 
   unfollowUser: id => {
-
     return $.ajax({
       method: 'DELETE',
       url: `/users/${id}/follow`,
       dataType: 'json'
   })
+  },
+
+  searchUsers: queryVal => {
+    return $.ajax({
+      method: 'GET',
+      url: '/users/search',
+      dataType: 'json'
+    })
   }
 };
 
@@ -143,18 +150,28 @@ class FollowToggle {
         } else if (this.followState === true) {
             this.$el.html("Unfollow!");
             this.$el.prop('disabled', false);
+        } else if (this.followState === "following") {
+            this.$el.html("Unfollowing...");
+            this.$el.prop('disabled', true);
+        } else if (this.followState === "unfollowing") {
+            this.$el.html("Following...");
+            this.$el.prop('disabled', true);
         }
     }
 
     handleClick(e) {
         e.preventDefault();
         if (this.followState === false) {
+            this.followState = "following";
+            this.render();
             APIUtil.followUser(this.userId).then(() => {
-
+                
                 this.followState = true;
                 this.render();
             })
         } else {
+            this.followState = "unfollowing";
+            this.render();
             APIUtil.unfollowUser(this.userId).then(() => {
 
                 this.followState = false;
@@ -180,7 +197,9 @@ const FollowToggle = __webpack_require__(/*! ./follow_toggle.js */ "./frontend/f
 
 $(function(){
     $("button.follow-toggle").each((idx, btn) => new FollowToggle(btn));
+    $(".users-search").each((idx, search) => new UsersSearch(search)); 
 })
+
 
 
 
